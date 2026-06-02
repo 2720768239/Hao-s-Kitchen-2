@@ -1,0 +1,17 @@
+:root {
+  --paper: #efe4cf;
+  --ink: #17130f;
+  --muted-ink: #6f6255;
+  --stamp-red: #a92519;
+  --line: rgba(23, 19, 15, 0.42);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+}
