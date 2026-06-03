@@ -1,4 +1,5 @@
 import { randomBytes, randomUUID } from "node:crypto";
+import { DomainError } from "@/lib/domain/errors";
 import type { AppDatabase, MealSessionRecord } from "./repositories";
 import { mapMealSessionRow } from "./repositories";
 import type { Clock } from "./public-service";
@@ -101,6 +102,113 @@ export function createChefService(
           };
         });
     },
+
+    listDishes(): DishRecord[] {
+      return database.sqlite
+        .prepare(
+          `SELECT id, name, image_path, description, tags, sort_order, is_available, created_at, updated_at
+           FROM dishes
+           ORDER BY sort_order ASC, created_at ASC`,
+        )
+        .all()
+        .map(mapDishRow);
+    },
+
+    createDish(input: CreateDishInput): DishRecord {
+      const now = clock.now().getTime();
+      const dish = {
+        id: randomUUID(),
+        name: input.name.trim(),
+        imagePath: input.imagePath.trim(),
+        description: input.description.trim(),
+        tags: input.tags.map((tag) => tag.trim()).filter(Boolean),
+        sortOrder: input.sortOrder,
+        isAvailable: input.isAvailable,
+        createdAt: new Date(now),
+        updatedAt: new Date(now),
+      };
+
+      if (!dish.name) {
+        throw new DomainError("菜名不能为空");
+      }
+
+      database.sqlite
+        .prepare(
+          `INSERT INTO dishes (id, name, image_path, description, tags, sort_order, is_available, created_at, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        )
+        .run(
+          dish.id,
+          dish.name,
+          dish.imagePath,
+          dish.description,
+          JSON.stringify(dish.tags),
+          dish.sortOrder,
+          dish.isAvailable ? 1 : 0,
+          now,
+          now,
+        );
+
+      return dish;
+    },
+
+    updateDish(id: string, input: UpdateDishInput): DishRecord | null {
+      const current = findDish(database, id);
+
+      if (!current) {
+        return null;
+      }
+
+      const updated = {
+        ...current,
+        ...input,
+        name: input.name?.trim() ?? current.name,
+        imagePath: input.imagePath?.trim() ?? current.imagePath,
+        description: input.description?.trim() ?? current.description,
+        tags: input.tags?.map((tag) => tag.trim()).filter(Boolean) ?? current.tags,
+        updatedAt: clock.now(),
+      };
+
+      if (!updated.name) {
+        throw new DomainError("菜名不能为空");
+      }
+
+      database.sqlite
+        .prepare(
+          `UPDATE dishes
+           SET name = ?, image_path = ?, description = ?, tags = ?, sort_order = ?, is_available = ?, updated_at = ?
+           WHERE id = ?`,
+        )
+        .run(
+          updated.name,
+          updated.imagePath,
+          updated.description,
+          JSON.stringify(updated.tags),
+          updated.sortOrder,
+          updated.isAvailable ? 1 : 0,
+          updated.updatedAt.getTime(),
+          id,
+        );
+
+      return updated;
+    },
+
+    reorderDishes(items: ReorderDishInput[]): DishRecord[] {
+      const reorder = database.sqlite.transaction(() => {
+        const statement = database.sqlite.prepare(
+          `UPDATE dishes SET sort_order = ?, updated_at = ? WHERE id = ?`,
+        );
+        const now = clock.now().getTime();
+
+        for (const item of items) {
+          statement.run(item.sortOrder, now, item.id);
+        }
+      });
+
+      reorder();
+
+      return this.listDishes();
+    },
   };
 }
 
@@ -110,6 +218,34 @@ export type ToCookItem = {
   customerName: string;
   notes: string;
   createdAt: Date;
+};
+
+export type DishRecord = {
+  id: string;
+  name: string;
+  imagePath: string;
+  description: string;
+  tags: string[];
+  sortOrder: number;
+  isAvailable: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type CreateDishInput = {
+  name: string;
+  imagePath: string;
+  description: string;
+  tags: string[];
+  sortOrder: number;
+  isAvailable: boolean;
+};
+
+export type UpdateDishInput = Partial<CreateDishInput>;
+
+export type ReorderDishInput = {
+  id: string;
+  sortOrder: number;
 };
 
 function findActiveMeal(database: AppDatabase): MealSessionRecord | null {
@@ -123,4 +259,55 @@ function findActiveMeal(database: AppDatabase): MealSessionRecord | null {
     .get() as Parameters<typeof mapMealSessionRow>[0] | undefined;
 
   return row ? mapMealSessionRow(row) : null;
+}
+
+function findDish(database: AppDatabase, id: string): DishRecord | null {
+  const row = database.sqlite
+    .prepare(
+      `SELECT id, name, image_path, description, tags, sort_order, is_available, created_at, updated_at
+       FROM dishes
+       WHERE id = ?`,
+    )
+    .get(id) as DishRow | undefined;
+
+  return row ? mapDishRow(row) : null;
+}
+
+type DishRow = {
+  id: string;
+  name: string;
+  image_path: string;
+  description: string;
+  tags: string;
+  sort_order: number;
+  is_available: number;
+  created_at: number;
+  updated_at: number;
+};
+
+function mapDishRow(row: unknown): DishRecord {
+  const dish = row as DishRow;
+
+  return {
+    id: dish.id,
+    name: dish.name,
+    imagePath: dish.image_path,
+    description: dish.description,
+    tags: parseTags(dish.tags),
+    sortOrder: dish.sort_order,
+    isAvailable: Boolean(dish.is_available),
+    createdAt: new Date(dish.created_at),
+    updatedAt: new Date(dish.updated_at),
+  };
+}
+
+function parseTags(value: string): string[] {
+  try {
+    const parsed = JSON.parse(value) as unknown;
+    return Array.isArray(parsed)
+      ? parsed.filter((item): item is string => typeof item === "string")
+      : [];
+  } catch {
+    return [];
+  }
 }
