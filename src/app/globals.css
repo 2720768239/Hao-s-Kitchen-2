@@ -75,6 +75,10 @@ button:disabled {
   position: relative;
 }
 
+.closed-poster {
+  justify-content: flex-start;
+}
+
 .brush-title {
   margin: 42px 0 12px;
   font-size: clamp(68px, 18vw, 92px);
@@ -101,17 +105,30 @@ button:disabled {
   font-weight: 700;
 }
 
+.poster-chef-frame {
+  align-self: stretch;
+  width: calc(100% + 32px);
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: 14px -16px 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.closed-view {
+  padding-bottom: 24px;
+}
+
 .poster-chef {
-  width: min(80%, 280px);
-  margin-top: 16px;
-  object-fit: contain;
+  object-fit: cover;
+  object-position: center bottom;
 }
 
 .paper-tags {
   display: grid;
   gap: 12px;
-  margin-top: auto;
-  margin-bottom: 26px;
+  margin-top: 8px;
+  margin-bottom: 0;
 }
 
 .paper-tags span,
