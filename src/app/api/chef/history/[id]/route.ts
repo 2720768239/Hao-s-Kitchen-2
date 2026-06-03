@@ -1,4 +1,5 @@
 import { getDatabase } from "@/db/client";
+import { requireChefApiSession } from "@/lib/auth/chef-guard";
 import { jsonError } from "@/lib/http/json";
 import { createChefService } from "@/server/chef-service";
 import type { AppDatabase } from "@/server/repositories";
@@ -10,11 +11,16 @@ export function setChefHistoryDetailTestDatabase(database: AppDatabase | undefin
 }
 
 export async function GET(
-  _request: Request,
+  request: Request,
   context: { params: Promise<{ id: string }> },
 ) {
-  const { id } = await context.params;
   const database = testDatabase ?? getDatabase();
+  const unauthorized = requireChefApiSession(request, database);
+  if (unauthorized) {
+    return unauthorized;
+  }
+
+  const { id } = await context.params;
   const history = createChefService(database).getHistoryDetail(id);
 
   if (!history) {

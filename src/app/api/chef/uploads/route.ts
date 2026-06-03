@@ -1,8 +1,23 @@
+import { getDatabase } from "@/db/client";
+import { requireChefApiSession } from "@/lib/auth/chef-guard";
 import { DomainError } from "@/lib/domain/errors";
 import { jsonError } from "@/lib/http/json";
 import { saveUploadedImage } from "@/lib/uploads/images";
+import type { AppDatabase } from "@/server/repositories";
+
+let testDatabase: AppDatabase | undefined;
+
+export function setChefUploadsTestDatabase(database: AppDatabase | undefined) {
+  testDatabase = database;
+}
 
 export async function POST(request: Request) {
+  const database = testDatabase ?? getDatabase();
+  const unauthorized = requireChefApiSession(request, database);
+  if (unauthorized) {
+    return unauthorized;
+  }
+
   const form = await request.formData().catch(() => null);
   const file = form?.get("file");
 

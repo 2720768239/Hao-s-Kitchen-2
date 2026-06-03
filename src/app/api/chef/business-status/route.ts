@@ -1,4 +1,5 @@
 import { getDatabase } from "@/db/client";
+import { requireChefApiSession } from "@/lib/auth/chef-guard";
 import { jsonError } from "@/lib/http/json";
 import { createChefService } from "@/server/chef-service";
 import { globalEventBus } from "@/server/event-bus";
@@ -11,13 +12,18 @@ export function setChefStatusTestDatabase(database: AppDatabase | undefined) {
 }
 
 export async function POST(request: Request) {
+  const database = testDatabase ?? getDatabase();
+  const unauthorized = requireChefApiSession(request, database);
+  if (unauthorized) {
+    return unauthorized;
+  }
+
   const body = (await request.json().catch(() => null)) as { status?: unknown } | null;
 
   if (body?.status !== "gathering" && body?.status !== "archived") {
     return jsonError(400, "状态不可用");
   }
 
-  const database = testDatabase ?? getDatabase();
   const meal = createChefService(database, { eventBus: globalEventBus }).setBusinessStatus(body.status);
 
   return Response.json(

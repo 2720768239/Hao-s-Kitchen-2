@@ -133,6 +133,7 @@ button:disabled {
   border: 1px solid var(--line);
   border-radius: 14px;
   background: rgba(255, 250, 239, 0.72);
+  margin-bottom: 14px;
 }
 
 .hero-panel img {
@@ -151,6 +152,30 @@ button:disabled {
   margin: 0;
 }
 
+.hero-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.hero-status {
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(169, 37, 25, 0.12);
+  color: var(--stamp-red);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.hero-scroll {
+  display: inline-block;
+  margin-top: 10px;
+  color: var(--muted-ink);
+  font-size: 12px;
+  font-weight: 900;
+}
+
 .dish-list {
   display: grid;
   gap: 10px;
@@ -163,6 +188,15 @@ button:disabled {
   border-radius: 10px;
   background: rgba(169, 37, 25, 0.12);
   color: var(--stamp-red);
+  font-weight: 900;
+}
+
+.public-feedback {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(23, 19, 15, 0.08);
+  color: var(--ink);
   font-weight: 900;
 }
 
@@ -579,7 +613,7 @@ button:disabled {
 
 .row-card {
   display: grid;
-  grid-template-columns: 1fr auto auto;
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
   gap: 10px;
   align-items: center;
 }
@@ -597,6 +631,26 @@ button:disabled {
   margin-top: 4px;
   color: var(--muted-ink);
   font-size: 13px;
+}
+
+.sort-order-badge {
+  color: var(--muted-ink);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.chef-row-actions {
+  display: grid;
+  gap: 6px;
+}
+
+.chef-secondary {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.44);
+  color: var(--ink);
+  font-weight: 900;
 }
 
 .editor-form {
@@ -625,6 +679,13 @@ button:disabled {
   border-top: 1px solid var(--line);
   padding-top: 10px;
   margin-top: 10px;
+}
+
+.history-order-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .chef-tabbar {

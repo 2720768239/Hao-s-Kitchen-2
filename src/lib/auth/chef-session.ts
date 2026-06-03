@@ -38,6 +38,59 @@ export function buildChefSessionCookie(token: string) {
     .join("; ");
 }
 
+export function getChefSessionTokenFromCookieHeader(cookieHeader: string | null): string | null {
+  if (!cookieHeader) {
+    return null;
+  }
+
+  for (const entry of cookieHeader.split(";")) {
+    const [rawName, ...rest] = entry.trim().split("=");
+
+    if (rawName !== CHEF_SESSION_COOKIE) {
+      continue;
+    }
+
+    const rawValue = rest.join("=");
+    if (!rawValue) {
+      return null;
+    }
+
+    try {
+      return decodeURIComponent(rawValue);
+    } catch {
+      return rawValue;
+    }
+  }
+
+  return null;
+}
+
+export function isChefSessionTokenValid(
+  token: string,
+  database: AppDatabase = getDatabase(),
+  now = Date.now(),
+): boolean {
+  database.sqlite.prepare("DELETE FROM chef_sessions WHERE expires_at <= ?").run(now);
+
+  const session = database.sqlite
+    .prepare(
+      `SELECT 1
+       FROM chef_sessions
+       WHERE token_hash = ?
+         AND expires_at > ?
+       LIMIT 1`,
+    )
+    .get(hashSessionToken(token), now);
+
+  return Boolean(session);
+}
+
+export function destroyChefSession(token: string, database: AppDatabase = getDatabase()) {
+  database.sqlite
+    .prepare("DELETE FROM chef_sessions WHERE token_hash = ?")
+    .run(hashSessionToken(token));
+}
+
 export function hashSessionToken(token: string) {
   return createHash("sha256").update(token).digest("hex");
 }

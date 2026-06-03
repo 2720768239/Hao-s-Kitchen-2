@@ -1,9 +1,11 @@
 import { getDatabase } from "@/db/client";
+import { requireChefPageSession } from "@/lib/auth/chef-guard";
 import { ChefShell } from "@/components/chef/chef-shell";
 import { ToCookList } from "@/components/chef/to-cook-list";
 import { createChefService } from "@/server/chef-service";
 
-export default function ToCookPage() {
+export default async function ToCookPage() {
+  await requireChefPageSession();
   return (
     <ChefShell title="待做清单">
       <ToCookList items={createChefService(getDatabase()).getToCook()} />

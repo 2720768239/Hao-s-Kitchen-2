@@ -1,4 +1,5 @@
 import { getDatabase } from "@/db/client";
+import { requireChefApiSession } from "@/lib/auth/chef-guard";
 import { DomainError } from "@/lib/domain/errors";
 import { jsonError } from "@/lib/http/json";
 import { createChefService } from "@/server/chef-service";
@@ -15,6 +16,11 @@ const dishPatchSchema = z.object({
 });
 
 export async function PATCH(request: Request, context: { params: Promise<{ id: string }> }) {
+  const unauthorized = requireChefApiSession(request);
+  if (unauthorized) {
+    return unauthorized;
+  }
+
   const body = await request.json().catch(() => null);
   const parsed = dishPatchSchema.safeParse(body);
 

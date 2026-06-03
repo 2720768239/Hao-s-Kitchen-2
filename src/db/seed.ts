@@ -45,23 +45,23 @@ const seedDishRows = [
 ];
 
 export function seedDishes(database = getDatabase()): void {
+  const existingCount = database.sqlite
+    .prepare("SELECT COUNT(*) AS count FROM dishes")
+    .get() as { count: number };
+
+  if (existingCount.count > 0) {
+    return;
+  }
+
   const now = Date.now();
-  const upsert = database.sqlite.prepare(
+  const insert = database.sqlite.prepare(
     `INSERT INTO dishes (
        id, name, image_path, description, tags, sort_order, is_available, created_at, updated_at
-     ) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?)
-     ON CONFLICT(id) DO UPDATE SET
-       name = excluded.name,
-       image_path = excluded.image_path,
-       description = excluded.description,
-       tags = excluded.tags,
-       sort_order = excluded.sort_order,
-       is_available = 1,
-       updated_at = excluded.updated_at`,
+     ) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?)`,
   );
 
   for (const row of seedDishRows) {
-    upsert.run(
+    insert.run(
       row.id,
       row.name,
       row.imagePath,

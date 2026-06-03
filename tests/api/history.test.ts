@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
+import { CHEF_SESSION_COOKIE, createChefSession } from "@/lib/auth/chef-session";
 import {
   GET as getHistoryDetail,
   setChefHistoryDetailTestDatabase,
@@ -35,9 +36,15 @@ describe("history api", () => {
     app.chef.setBusinessStatus("archived");
 
     setChefHistoryDetailTestDatabase(app);
-    const response = await getHistoryDetail(new Request("http://localhost/api/chef/history/meal"), {
-      params: Promise.resolve({ id: meal.id }),
-    });
+    const authCookie = `${CHEF_SESSION_COOKIE}=${createChefSession(app)}`;
+    const response = await getHistoryDetail(
+      new Request("http://localhost/api/chef/history/meal", {
+        headers: { cookie: authCookie },
+      }),
+      {
+        params: Promise.resolve({ id: meal.id }),
+      },
+    );
 
     expect(response.status).toBe(200);
     expect(await response.json()).toMatchObject({

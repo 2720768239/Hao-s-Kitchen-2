@@ -4,19 +4,27 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { POST as upload } from "@/app/api/chef/uploads/route";
+import { CHEF_SESSION_COOKIE, createChefSession } from "@/lib/auth/chef-session";
+import { POST as upload, setChefUploadsTestDatabase } from "@/app/api/chef/uploads/route";
+import { createTestDatabase } from "../helpers/database";
 
 let uploadDir: string;
+let authCookie: string;
 const originalUploadDir = process.env.UPLOAD_DIR;
 
 beforeEach(() => {
   uploadDir = fs.mkdtempSync(path.join(os.tmpdir(), "hao-upload-"));
   process.env.UPLOAD_DIR = uploadDir;
+
+  const database = createTestDatabase();
+  setChefUploadsTestDatabase(database);
+  authCookie = `${CHEF_SESSION_COOKIE}=${createChefSession(database)}`;
 });
 
 afterEach(() => {
   process.env.UPLOAD_DIR = originalUploadDir;
   fs.rmSync(uploadDir, { recursive: true, force: true });
+  setChefUploadsTestDatabase(undefined);
 });
 
 function fileUploadRequest(file: File) {
@@ -25,6 +33,7 @@ function fileUploadRequest(file: File) {
   return new Request("http://localhost/api/chef/uploads", {
     method: "POST",
     body: form,
+    headers: { cookie: authCookie },
   });
 }
 

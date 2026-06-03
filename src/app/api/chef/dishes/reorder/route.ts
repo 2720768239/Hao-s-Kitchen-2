@@ -1,4 +1,5 @@
 import { getDatabase } from "@/db/client";
+import { requireChefApiSession } from "@/lib/auth/chef-guard";
 import { jsonError } from "@/lib/http/json";
 import { createChefService } from "@/server/chef-service";
 import { globalEventBus } from "@/server/event-bus";
@@ -14,6 +15,11 @@ const reorderSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  const unauthorized = requireChefApiSession(request);
+  if (unauthorized) {
+    return unauthorized;
+  }
+
   const body = await request.json().catch(() => null);
   const parsed = reorderSchema.safeParse(body);
 

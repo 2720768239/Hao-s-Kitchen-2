@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
+import { CHEF_SESSION_COOKIE, createChefSession } from "@/lib/auth/chef-session";
 import {
   GET as publicState,
   setPublicStateTestDatabase,
@@ -11,11 +12,11 @@ afterEach(() => {
   setPublicStateTestDatabase(undefined);
 });
 
-function jsonRequest(path: string, body?: unknown) {
+function jsonRequest(path: string, body: unknown, authCookie: string) {
   return new Request(`http://localhost${path}`, {
     method: "POST",
-    body: JSON.stringify(body ?? {}),
-    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+    headers: { "Content-Type": "application/json", cookie: authCookie },
   });
 }
 
@@ -24,15 +25,16 @@ describe("chef business status api", () => {
     const database = createTestDatabase();
     setChefStatusTestDatabase(database);
     setPublicStateTestDatabase(database);
+    const authCookie = `${CHEF_SESSION_COOKIE}=${createChefSession(database)}`;
 
     const gathering = await businessStatus(
-      jsonRequest("/api/chef/business-status", { status: "gathering" }),
+      jsonRequest("/api/chef/business-status", { status: "gathering" }, authCookie),
     );
     expect(gathering.status).toBe(200);
     const meal = (await gathering.json()) as { inviteToken: string };
 
     const archived = await businessStatus(
-      jsonRequest("/api/chef/business-status", { status: "archived" }),
+      jsonRequest("/api/chef/business-status", { status: "archived" }, authCookie),
     );
     expect(archived.status).toBe(200);
 

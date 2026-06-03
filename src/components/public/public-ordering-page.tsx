@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSseRefresh } from "@/hooks/use-sse-refresh";
@@ -40,6 +41,7 @@ export function PublicOrderingPage({ inviteToken, dishes }: PublicOrderingPagePr
   const [ownHolds, setOwnHolds] = useState<DrawerDish[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [error, setError] = useState("");
+  const [feedback, setFeedback] = useState("");
   const serverDishStateById = useMemo(
     () => new Map(dishes.map((dish) => [dish.id, dish.state])),
     [dishes],
@@ -59,6 +61,18 @@ export function PublicOrderingPage({ inviteToken, dishes }: PublicOrderingPagePr
 
   const refresh = useCallback(() => router.refresh(), [router]);
   useSseRefresh(`/api/events/${inviteToken}`, refresh);
+
+  useEffect(() => {
+    if (!feedback) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      setFeedback("");
+    }, 2200);
+
+    return () => window.clearTimeout(timer);
+  }, [feedback]);
 
   useEffect(() => {
     let cancelled = false;
@@ -229,6 +243,7 @@ export function PublicOrderingPage({ inviteToken, dishes }: PublicOrderingPagePr
 
     setOwnHolds([]);
     setDialogOpen(false);
+    setFeedback("懂你意思");
     router.refresh();
   }
 
@@ -239,16 +254,21 @@ export function PublicOrderingPage({ inviteToken, dishes }: PublicOrderingPagePr
         <span>好好吃饭，反抗平庸！</span>
       </header>
 
-      {/* <section className="hero-panel">
+      <section className="hero-panel" aria-labelledby="gathering-title">
         <Image src="/assets/chef-hero-v2.png" alt="" width={112} height={112} priority />
         <div>
-          <p className="paper-stamp">厨房才是主场</p>
-          <h1>今晚吃这些</h1>
-          <p>每道菜，只能被一个人正式拿下。</p>
+          <div className="hero-meta">
+            <p className="paper-stamp">英雄集结</p>
+            <span className="hero-status">营业中</span>
+          </div>
+          <h1 id="gathering-title">今晚吃这些</h1>
+          <p>厨房才是主场。先看菜单，馋好了就去底部报上名来。</p>
+          <span className="hero-scroll">向下看菜，底部报上名来</span>
         </div>
-      </section> */}
+      </section>
 
       {error ? <p className="public-error">{error}</p> : null}
+      {feedback ? <p className="public-feedback">{feedback}</p> : null}
 
       <section className="dish-list" aria-label="今晚菜单">
         {visibleDishes.map((dish) => (

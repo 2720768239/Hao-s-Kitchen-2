@@ -1,4 +1,5 @@
 import { getDatabase } from "@/db/client";
+import { requireChefApiSession } from "@/lib/auth/chef-guard";
 import { DomainError } from "@/lib/domain/errors";
 import { jsonError } from "@/lib/http/json";
 import { createChefService } from "@/server/chef-service";
@@ -21,13 +22,23 @@ export function setChefDishesTestDatabase(database: AppDatabase | undefined) {
   testDatabase = database;
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   const database = testDatabase ?? getDatabase();
+  const unauthorized = requireChefApiSession(request, database);
+  if (unauthorized) {
+    return unauthorized;
+  }
 
   return Response.json(createChefService(database).listDishes());
 }
 
 export async function POST(request: Request) {
+  const database = testDatabase ?? getDatabase();
+  const unauthorized = requireChefApiSession(request, database);
+  if (unauthorized) {
+    return unauthorized;
+  }
+
   const body = await request.json().catch(() => null);
   const parsed = dishSchema.safeParse(body);
 
@@ -36,7 +47,6 @@ export async function POST(request: Request) {
   }
 
   try {
-    const database = testDatabase ?? getDatabase();
     return Response.json(
       createChefService(database, { eventBus: globalEventBus }).createDish(parsed.data),
       { status: 201 },

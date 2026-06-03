@@ -1,5 +1,10 @@
+"use client";
+
 import Link from "next/link";
+import { useCallback } from "react";
+import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
+import { useSseRefresh } from "@/hooks/use-sse-refresh";
 
 type ChefShellProps = {
   title: string;
@@ -7,6 +12,10 @@ type ChefShellProps = {
 };
 
 export function ChefShell({ title, children }: ChefShellProps) {
+  const router = useRouter();
+  const refresh = useCallback(() => router.refresh(), [router]);
+  useSseRefresh("/api/chef/events", refresh);
+
   return (
     <main className="mobile-canvas chef-console">
       <header className="chef-header">

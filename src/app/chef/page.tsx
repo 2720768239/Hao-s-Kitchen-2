@@ -1,9 +1,11 @@
 import { getDatabase } from "@/db/client";
+import { requireChefPageSession } from "@/lib/auth/chef-guard";
 import { BusinessStatusCard } from "@/components/chef/business-status-card";
 import { ChefShell } from "@/components/chef/chef-shell";
 import { createChefService } from "@/server/chef-service";
 
-export default function ChefHomePage() {
+export default async function ChefHomePage() {
+  await requireChefPageSession();
   const chef = createChefService(getDatabase());
 
   return (
