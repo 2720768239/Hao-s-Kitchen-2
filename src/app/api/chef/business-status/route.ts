@@ -1,6 +1,7 @@
 import { getDatabase } from "@/db/client";
 import { jsonError } from "@/lib/http/json";
 import { createChefService } from "@/server/chef-service";
+import { globalEventBus } from "@/server/event-bus";
 import type { AppDatabase } from "@/server/repositories";
 
 let testDatabase: AppDatabase | undefined;
@@ -17,7 +18,7 @@ export async function POST(request: Request) {
   }
 
   const database = testDatabase ?? getDatabase();
-  const meal = createChefService(database).setBusinessStatus(body.status);
+  const meal = createChefService(database, { eventBus: globalEventBus }).setBusinessStatus(body.status);
 
   return Response.json(
     meal

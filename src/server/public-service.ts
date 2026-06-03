@@ -3,6 +3,7 @@ import { HOLD_DURATION_MS } from "@/lib/domain/constants";
 import { ConflictError, DomainError } from "@/lib/domain/errors";
 import type { AppDatabase, MealSessionRecord } from "./repositories";
 import { mapMealSessionRow } from "./repositories";
+import type { EventTopic, RefreshEvent } from "./event-bus";
 
 export type Clock = {
   now: () => Date;
@@ -26,6 +27,14 @@ type SubmitOrderInput = {
   dishIds: string[];
 };
 
+type RemoveHoldInput = {
+  inviteToken: string;
+  holdId: string;
+  clientSessionId: string;
+};
+
+type RefreshPublisher = { publish: (topic: EventTopic, event: RefreshEvent["event"]) => unknown };
+
 export type DishHoldRecord = {
   id: string;
   mealSessionId: string;
@@ -37,9 +46,10 @@ export type DishHoldRecord = {
 
 export function createPublicService(
   database: AppDatabase,
-  options: { clock?: Clock } = {},
+  options: { clock?: Clock; eventBus?: RefreshPublisher } = {},
 ) {
   const clock = options.clock ?? { now: () => new Date() };
+  const publish = options.eventBus;
 
   return {
     getState(inviteToken?: string): PublicState {
@@ -67,11 +77,24 @@ export function createPublicService(
     },
 
     createHold(input: CreateHoldInput): DishHoldRecord {
-      return createHold(database, clock, input);
+      const hold = createHold(database, clock, input);
+      publish?.publish(`public:${input.inviteToken}`, "refresh");
+      publish?.publish("chef", "refresh");
+      return hold;
+    },
+
+    removeOwnHold(input: RemoveHoldInput): { removed: boolean } {
+      const result = removeOwnHold(database, input);
+      publish?.publish(`public:${input.inviteToken}`, "refresh");
+      publish?.publish("chef", "refresh");
+      return result;
     },
 
     submitOrder(input: SubmitOrderInput): { id: string } {
-      return submitOrder(database, clock, input);
+      const order = submitOrder(database, clock, input);
+      publish?.publish(`public:${input.inviteToken}`, "refresh");
+      publish?.publish("chef", "refresh");
+      return order;
     },
   };
 }
@@ -262,6 +285,25 @@ function submitOrder(
 
     return { id: orderId };
   })();
+}
+
+function removeOwnHold(database: AppDatabase, input: RemoveHoldInput): { removed: boolean } {
+  const meal = findGatheringMealByInviteToken(database, input.inviteToken);
+
+  if (!meal) {
+    throw new DomainError("饭局已经群雄归隐");
+  }
+
+  const result = database.sqlite
+    .prepare(
+      `DELETE FROM dish_holds
+       WHERE id = ?
+         AND meal_session_id = ?
+         AND client_session_id = ?`,
+    )
+    .run(input.holdId, meal.id, input.clientSessionId);
+
+  return { removed: result.changes > 0 };
 }
 
 type DishHoldRow = {

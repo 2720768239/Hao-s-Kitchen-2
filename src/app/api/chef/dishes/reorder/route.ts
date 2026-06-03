@@ -1,6 +1,7 @@
 import { getDatabase } from "@/db/client";
 import { jsonError } from "@/lib/http/json";
 import { createChefService } from "@/server/chef-service";
+import { globalEventBus } from "@/server/event-bus";
 import { z } from "zod";
 
 const reorderSchema = z.object({
@@ -20,5 +21,7 @@ export async function POST(request: Request) {
     return jsonError(400, "排序信息不完整", parsed.error.flatten());
   }
 
-  return Response.json(createChefService(getDatabase()).reorderDishes(parsed.data.items));
+  return Response.json(
+    createChefService(getDatabase(), { eventBus: globalEventBus }).reorderDishes(parsed.data.items),
+  );
 }

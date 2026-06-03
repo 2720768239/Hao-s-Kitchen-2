@@ -2,6 +2,7 @@ import { getDatabase } from "@/db/client";
 import { DomainError } from "@/lib/domain/errors";
 import { jsonError } from "@/lib/http/json";
 import { createChefService } from "@/server/chef-service";
+import { globalEventBus } from "@/server/event-bus";
 import type { AppDatabase } from "@/server/repositories";
 import { z } from "zod";
 
@@ -36,7 +37,10 @@ export async function POST(request: Request) {
 
   try {
     const database = testDatabase ?? getDatabase();
-    return Response.json(createChefService(database).createDish(parsed.data), { status: 201 });
+    return Response.json(
+      createChefService(database, { eventBus: globalEventBus }).createDish(parsed.data),
+      { status: 201 },
+    );
   } catch (error) {
     if (error instanceof DomainError) {
       return jsonError(400, error.message);

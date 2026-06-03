@@ -2,6 +2,7 @@ import { getDatabase } from "@/db/client";
 import { DomainError } from "@/lib/domain/errors";
 import { jsonError } from "@/lib/http/json";
 import { createChefService } from "@/server/chef-service";
+import { globalEventBus } from "@/server/event-bus";
 import { z } from "zod";
 
 const dishPatchSchema = z.object({
@@ -23,7 +24,10 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
 
   try {
     const { id } = await context.params;
-    const updated = createChefService(getDatabase()).updateDish(id, parsed.data);
+    const updated = createChefService(getDatabase(), { eventBus: globalEventBus }).updateDish(
+      id,
+      parsed.data,
+    );
 
     if (!updated) {
       return jsonError(404, "菜品不存在");
