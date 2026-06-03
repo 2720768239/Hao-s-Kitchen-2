@@ -9,6 +9,28 @@ import { SelectionDrawer } from "./selection-drawer";
 import { SubmitDialog } from "./submit-dialog";
 import type { DrawerDish, PublicDish } from "./types";
 
+const HOLD_SUCCESS_TEXTS = [
+  "已经记你头上了",
+  "行，算你会吃",
+  "这道给你留着",
+  "你果然识货",
+  "已经馋上了",
+  "这口你跑不掉了",
+];
+
+const AVAILABLE_ACTION_TEXTS = [
+  "我馋这个",
+  "给我这个",
+  "就它了",
+  "快做这个",
+  "这个先上",
+  "我要吃这个",
+  "先记一嘴",
+  "这个必须吃",
+  "馋不住了",
+  "我要这个！！",
+];
+
 type PublicOrderingPageProps = {
   inviteToken: string;
   dishes: PublicDish[];
@@ -27,9 +49,23 @@ export function PublicOrderingPage({ inviteToken, dishes }: PublicOrderingPagePr
   const refresh = useCallback(() => router.refresh(), [router]);
   useSseRefresh(`/api/events/${inviteToken}`, refresh);
 
-  const visibleDishes = dishes.map((dish) =>
-    selectedDishIds.has(dish.id) ? { ...dish, state: "held" as const } : dish,
-  );
+  const visibleDishes = dishes.map((dish) => {
+    const selected = ownHolds.find((item) => (item.dishId ?? item.id) === dish.id);
+
+    if (selected) {
+      return {
+        ...dish,
+        state: "selected" as const,
+        actionText: selected.actionText,
+      };
+    }
+
+    return {
+      ...dish,
+      actionText: dish.state === "available" ? pickStableText(AVAILABLE_ACTION_TEXTS, dish.id) : undefined,
+    };
+  });
+
   const claimed = visibleDishes
     .filter((dish) => dish.state === "claimed")
     .map((dish) => ({ id: dish.id, dishName: dish.name, customerName: dish.claimedBy }));
@@ -62,8 +98,54 @@ export function PublicOrderingPage({ inviteToken, dishes }: PublicOrderingPagePr
     const hold = (await response.json()) as { id: string; dishId: string };
     setOwnHolds((items) => [
       ...items,
-      { id: hold.id, dishId: hold.dishId, dishName: selected.name },
+      {
+        id: hold.id,
+        dishId: hold.dishId,
+        dishName: selected.name,
+        actionText: pickStableText(HOLD_SUCCESS_TEXTS, hold.dishId),
+      },
     ]);
+  }
+
+  async function removeHold(holdId: string) {
+    const hold = ownHolds.find((item) => item.id === holdId);
+
+    if (!hold) {
+      return;
+    }
+
+    setError("");
+    const response = await fetch(`/api/public/holds/${holdId}`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        inviteToken,
+        clientSessionId: getClientSessionId(),
+      }),
+    });
+
+    if (!response.ok) {
+      const body = (await response.json().catch(() => null)) as { error?: string } | null;
+      setError(body?.error ?? "这道菜暂时不能取消");
+      router.refresh();
+      return;
+    }
+
+    setOwnHolds((items) => items.filter((item) => item.id !== holdId));
+    router.refresh();
+  }
+
+  async function handleDishAction(dish: PublicDish) {
+    if (dish.state === "selected") {
+      const hold = ownHolds.find((item) => (item.dishId ?? item.id) === dish.id);
+
+      if (hold) {
+        await removeHold(hold.id);
+      }
+      return;
+    }
+
+    await holdDish(dish.id);
   }
 
   async function submitOrder(input: { customerName: string; notes: string }) {
@@ -98,24 +180,29 @@ export function PublicOrderingPage({ inviteToken, dishes }: PublicOrderingPagePr
         <span>好好吃饭，反抗平庸！</span>
       </header>
 
-      <section className="hero-panel">
+      {/* <section className="hero-panel">
         <Image src="/assets/chef-hero-v2.png" alt="" width={112} height={112} priority />
         <div>
           <p className="paper-stamp">厨房才是主场</p>
           <h1>今晚吃这些</h1>
-          <p>每道菜，只能被一个人正式拿下！</p>
+          <p>每道菜，只能被一个人正式拿下。</p>
         </div>
-      </section>
+      </section> */}
 
       {error ? <p className="public-error">{error}</p> : null}
 
       <section className="dish-list" aria-label="今晚菜单">
         {visibleDishes.map((dish) => (
-          <DishCard key={dish.id} dish={dish} onHold={holdDish} />
+          <DishCard key={dish.id} dish={dish} onAction={handleDishAction} />
         ))}
       </section>
 
-      <SelectionDrawer ownHolds={ownHolds} claimed={claimed} onSubmit={() => setDialogOpen(true)} />
+      <SelectionDrawer
+        ownHolds={ownHolds}
+        claimed={claimed}
+        onSubmit={() => setDialogOpen(true)}
+        onRemoveHold={removeHold}
+      />
       <SubmitDialog open={dialogOpen} onClose={() => setDialogOpen(false)} onSubmit={submitOrder} />
     </main>
   );
@@ -132,4 +219,14 @@ function getClientSessionId(): string {
   const next = crypto.randomUUID();
   localStorage.setItem(key, next);
   return next;
+}
+
+function pickStableText(pool: string[], seed: string): string {
+  let hash = 0;
+
+  for (const char of seed) {
+    hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
+  }
+
+  return pool[hash % pool.length];
 }

@@ -1,4 +1,4 @@
-export type PublicDishState = "available" | "held" | "claimed" | "unavailable";
+export type PublicDishState = "available" | "selected" | "held" | "claimed" | "unavailable";
 
 export type PublicDish = {
   id: string;
@@ -8,6 +8,7 @@ export type PublicDish = {
   tags: string[];
   state: PublicDishState;
   claimedBy?: string;
+  actionText?: string;
 };
 
 export type DrawerDish = {
@@ -15,4 +16,5 @@ export type DrawerDish = {
   dishId?: string;
   dishName: string;
   customerName?: string;
+  actionText?: string;
 };
