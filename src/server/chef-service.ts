@@ -65,8 +65,52 @@ export function createChefService(
         archivedAt: new Date(archivedAt),
       };
     },
+
+    getToCook(): ToCookItem[] {
+      return database.sqlite
+        .prepare(
+          `SELECT
+             d.id AS dish_id,
+             d.name AS dish_name,
+             o.customer_name,
+             o.notes,
+             o.created_at
+           FROM orders o
+           INNER JOIN order_dishes od ON od.order_id = o.id
+           INNER JOIN dishes d ON d.id = od.dish_id
+           INNER JOIN meal_sessions ms ON ms.id = o.meal_session_id
+           WHERE ms.status = 'gathering'
+           ORDER BY o.created_at ASC, d.sort_order ASC`,
+        )
+        .all()
+        .map((row) => {
+          const item = row as {
+            dish_id: string;
+            dish_name: string;
+            customer_name: string;
+            notes: string | null;
+            created_at: number;
+          };
+
+          return {
+            dishId: item.dish_id,
+            dishName: item.dish_name,
+            customerName: item.customer_name,
+            notes: item.notes ?? "",
+            createdAt: new Date(item.created_at),
+          };
+        });
+    },
   };
 }
+
+export type ToCookItem = {
+  dishId: string;
+  dishName: string;
+  customerName: string;
+  notes: string;
+  createdAt: Date;
+};
 
 function findActiveMeal(database: AppDatabase): MealSessionRecord | null {
   const row = database.sqlite
