@@ -1,0 +1,9 @@
+node_modules
+.next
+data
+backups
+.git
+.worktrees
+.superpowers
+npm-debug.log
+*.local
