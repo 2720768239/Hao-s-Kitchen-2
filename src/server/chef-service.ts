@@ -1,10 +1,16 @@
 import { randomBytes, randomUUID } from "node:crypto";
 import type { AppDatabase, MealSessionRecord } from "./repositories";
 import { mapMealSessionRow } from "./repositories";
+import type { Clock } from "./public-service";
 
 type BusinessStatus = "gathering" | "archived";
 
-export function createChefService(database: AppDatabase) {
+export function createChefService(
+  database: AppDatabase,
+  options: { clock?: Clock } = {},
+) {
+  const clock = options.clock ?? { now: () => new Date() };
+
   return {
     setBusinessStatus(status: BusinessStatus): MealSessionRecord | null {
       if (status === "gathering") {
@@ -13,7 +19,7 @@ export function createChefService(database: AppDatabase) {
           return active;
         }
 
-        const now = Date.now();
+        const now = clock.now().getTime();
         const meal = {
           id: randomUUID(),
           inviteToken: randomBytes(24).toString("base64url"),
@@ -37,7 +43,7 @@ export function createChefService(database: AppDatabase) {
         return null;
       }
 
-      const archivedAt = Date.now();
+      const archivedAt = clock.now().getTime();
       const archive = database.sqlite.transaction(() => {
         database.sqlite
           .prepare("DELETE FROM dish_holds WHERE meal_session_id = ?")
