@@ -23,9 +23,6 @@ export function ChefShell({ title, children }: ChefShellProps) {
           <strong>极饿时代</strong>
           <span>主厨工具台</span>
         </div>
-        <Link href="/chef" className="chef-pill">
-          首页
-        </Link>
       </header>
       <h1 className="chef-title">{title}</h1>
       {children}
