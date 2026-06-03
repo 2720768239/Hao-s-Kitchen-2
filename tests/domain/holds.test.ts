@@ -45,4 +45,28 @@ describe("dish holds", () => {
       }).clientSessionId,
     ).toBe("client-b");
   });
+
+  it("lists the current client's active holds for hydration after refresh", () => {
+    const app = createTestApp();
+    const meal = app.chef.setBusinessStatus("gathering");
+    const firstDish = createDishFixture(app, { name: "杈ｅ瓙楦′竵" });
+    const secondDish = createDishFixture(app, { name: "楸奸鑲変笣" });
+
+    const firstHold = app.public.createHold({
+      inviteToken: meal.inviteToken,
+      dishId: firstDish.id,
+      clientSessionId: "client-a",
+    });
+    const secondHold = app.public.createHold({
+      inviteToken: meal.inviteToken,
+      dishId: secondDish.id,
+      clientSessionId: "client-a",
+    });
+
+    expect(app.public.listOwnHolds(meal.inviteToken, "client-a")).toEqual([
+      { id: firstHold.id, dishId: firstDish.id },
+      { id: secondHold.id, dishId: secondDish.id },
+    ]);
+    expect(app.public.listOwnHolds(meal.inviteToken, "client-b")).toEqual([]);
+  });
 });

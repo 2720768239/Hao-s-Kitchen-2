@@ -11,12 +11,36 @@ const holdSchema = z.object({
   clientSessionId: z.string().min(1),
 });
 
+const listOwnHoldsSchema = z.object({
+  inviteToken: z.string().min(1),
+  clientSessionId: z.string().min(1),
+});
+
+export async function GET(request: Request) {
+  const url = new URL(request.url);
+  const parsed = listOwnHoldsSchema.safeParse({
+    inviteToken: url.searchParams.get("inviteToken"),
+    clientSessionId: url.searchParams.get("clientSessionId"),
+  });
+
+  if (!parsed.success) {
+    return jsonError(400, "占位信息不完整", parsed.error.flatten());
+  }
+
+  return Response.json(
+    createPublicService(getDatabase(), { eventBus: globalEventBus }).listOwnHolds(
+      parsed.data.inviteToken,
+      parsed.data.clientSessionId,
+    ),
+  );
+}
+
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
   const parsed = holdSchema.safeParse(body);
 
   if (!parsed.success) {
-    return jsonError(400, "占菜信息不完整", parsed.error.flatten());
+    return jsonError(400, "占位信息不完整", parsed.error.flatten());
   }
 
   try {

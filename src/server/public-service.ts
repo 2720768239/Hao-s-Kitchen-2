@@ -13,6 +13,23 @@ export type PublicState =
   | { kind: "closed" }
   | { kind: "gathering"; mealSession: MealSessionRecord };
 
+export type PublicDishState = "available" | "held" | "claimed" | "unavailable";
+
+export type PublicDishRecord = {
+  id: string;
+  name: string;
+  imagePath: string;
+  description: string;
+  tags: string[];
+  state: PublicDishState;
+  claimedBy?: string;
+};
+
+export type OwnHoldRecord = {
+  id: string;
+  dishId: string;
+};
+
 type CreateHoldInput = {
   inviteToken: string;
   dishId: string;
@@ -95,6 +112,14 @@ export function createPublicService(
       publish?.publish(`public:${input.inviteToken}`, "refresh");
       publish?.publish("chef", "refresh");
       return order;
+    },
+
+    listPublicDishes(inviteToken: string): PublicDishRecord[] {
+      return listPublicDishes(database, clock, inviteToken);
+    },
+
+    listOwnHolds(inviteToken: string, clientSessionId: string): OwnHoldRecord[] {
+      return listOwnHolds(database, clock, inviteToken, clientSessionId);
     },
   };
 }
@@ -306,6 +331,145 @@ function removeOwnHold(database: AppDatabase, input: RemoveHoldInput): { removed
   return { removed: result.changes > 0 };
 }
 
+function listPublicDishes(
+  database: AppDatabase,
+  clock: Clock,
+  inviteToken: string,
+): PublicDishRecord[] {
+  const meal = findGatheringMealByInviteToken(database, inviteToken);
+
+  if (!meal) {
+    return [];
+  }
+
+  const nowMs = clock.now().getTime();
+
+  database.sqlite
+    .prepare("DELETE FROM dish_holds WHERE meal_session_id = ? AND expires_at <= ?")
+    .run(meal.id, nowMs);
+
+  const claimedRows = database.sqlite
+    .prepare(
+      `SELECT od.dish_id, o.customer_name
+       FROM order_dishes od
+       INNER JOIN orders o ON o.id = od.order_id
+       WHERE od.meal_session_id = ?`,
+    )
+    .all(meal.id) as Array<{ dish_id: string; customer_name: string }>;
+
+  const claimedByDishId = new Map<string, string>();
+  for (const row of claimedRows) {
+    claimedByDishId.set(row.dish_id, row.customer_name);
+  }
+
+  const heldDishIds = new Set(
+    database.sqlite
+      .prepare(
+        `SELECT dish_id
+         FROM dish_holds
+         WHERE meal_session_id = ? AND expires_at > ?`,
+      )
+      .all(meal.id, nowMs)
+      .map((row) => {
+        const item = row as { dish_id: string };
+        return item.dish_id;
+      }),
+  );
+
+  return database.sqlite
+    .prepare(
+      `SELECT id, name, image_path, description, tags, sort_order, is_available, created_at, updated_at
+       FROM dishes
+       ORDER BY sort_order ASC, created_at ASC`,
+    )
+    .all()
+    .map((row) => {
+      const dish = row as {
+        id: string;
+        name: string;
+        image_path: string;
+        description: string;
+        tags: string;
+        is_available: number;
+      };
+
+      if (!dish.is_available) {
+        return {
+          id: dish.id,
+          name: dish.name,
+          imagePath: dish.image_path,
+          description: dish.description,
+          tags: parseTags(dish.tags),
+          state: "unavailable" as const,
+        };
+      }
+
+      const claimedBy = claimedByDishId.get(dish.id);
+      if (claimedBy) {
+        return {
+          id: dish.id,
+          name: dish.name,
+          imagePath: dish.image_path,
+          description: dish.description,
+          tags: parseTags(dish.tags),
+          state: "claimed" as const,
+          claimedBy,
+        };
+      }
+
+      if (heldDishIds.has(dish.id)) {
+        return {
+          id: dish.id,
+          name: dish.name,
+          imagePath: dish.image_path,
+          description: dish.description,
+          tags: parseTags(dish.tags),
+          state: "held" as const,
+        };
+      }
+
+      return {
+        id: dish.id,
+        name: dish.name,
+        imagePath: dish.image_path,
+        description: dish.description,
+        tags: parseTags(dish.tags),
+        state: "available" as const,
+      };
+    });
+}
+
+function listOwnHolds(
+  database: AppDatabase,
+  clock: Clock,
+  inviteToken: string,
+  clientSessionId: string,
+): OwnHoldRecord[] {
+  const meal = findGatheringMealByInviteToken(database, inviteToken);
+
+  if (!meal) {
+    return [];
+  }
+
+  const nowMs = clock.now().getTime();
+  database.sqlite
+    .prepare("DELETE FROM dish_holds WHERE meal_session_id = ? AND expires_at <= ?")
+    .run(meal.id, nowMs);
+
+  return database.sqlite
+    .prepare(
+      `SELECT id, dish_id
+       FROM dish_holds
+       WHERE meal_session_id = ? AND client_session_id = ? AND expires_at > ?
+       ORDER BY hold_started_at ASC`,
+    )
+    .all(meal.id, clientSessionId, nowMs)
+    .map((row) => {
+      const hold = row as { id: string; dish_id: string };
+      return { id: hold.id, dishId: hold.dish_id };
+    });
+}
+
 type DishHoldRow = {
   id: string;
   meal_session_id: string;
@@ -324,4 +488,15 @@ function mapDishHoldRow(row: DishHoldRow): DishHoldRecord {
     holdStartedAt: new Date(row.hold_started_at),
     expiresAt: new Date(row.expires_at),
   };
+}
+
+function parseTags(value: string): string[] {
+  try {
+    const parsed = JSON.parse(value) as unknown;
+    return Array.isArray(parsed)
+      ? parsed.filter((item): item is string => typeof item === "string")
+      : [];
+  } catch {
+    return [];
+  }
 }

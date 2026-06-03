@@ -1,7 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
-import Image from "next/image";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSseRefresh } from "@/hooks/use-sse-refresh";
 import { DishCard } from "./dish-card";
@@ -41,16 +40,76 @@ export function PublicOrderingPage({ inviteToken, dishes }: PublicOrderingPagePr
   const [ownHolds, setOwnHolds] = useState<DrawerDish[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [error, setError] = useState("");
+  const serverDishStateById = useMemo(
+    () => new Map(dishes.map((dish) => [dish.id, dish.state])),
+    [dishes],
+  );
+  const activeOwnHolds = useMemo(
+    () =>
+      ownHolds.filter((item) => {
+        const dishId = item.dishId ?? item.id;
+        return serverDishStateById.get(dishId) === "held";
+      }),
+    [ownHolds, serverDishStateById],
+  );
   const selectedDishIds = useMemo(
-    () => new Set(ownHolds.map((item) => item.dishId ?? item.id)),
-    [ownHolds],
+    () => new Set(activeOwnHolds.map((item) => item.dishId ?? item.id)),
+    [activeOwnHolds],
   );
 
   const refresh = useCallback(() => router.refresh(), [router]);
   useSseRefresh(`/api/events/${inviteToken}`, refresh);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadOwnHolds() {
+      const clientSessionId = getClientSessionId();
+      const response = await fetch(
+        `/api/public/holds?inviteToken=${encodeURIComponent(inviteToken)}&clientSessionId=${encodeURIComponent(clientSessionId)}`,
+      );
+
+      if (!response.ok || cancelled) {
+        return;
+      }
+
+      const holds = (await response.json()) as Array<{ id: string; dishId: string }>;
+
+      setOwnHolds((current) => {
+        const merged = new Map<string, DrawerDish>();
+
+        for (const item of current) {
+          const dishId = item.dishId ?? item.id;
+          merged.set(dishId, item);
+        }
+
+        for (const hold of holds) {
+          const dish = dishes.find((item) => item.id === hold.dishId);
+          if (!dish) {
+            continue;
+          }
+
+          merged.set(hold.dishId, {
+            id: hold.id,
+            dishId: hold.dishId,
+            dishName: dish.name,
+            actionText: pickStableText(HOLD_SUCCESS_TEXTS, hold.dishId),
+          });
+        }
+
+        return Array.from(merged.values());
+      });
+    }
+
+    void loadOwnHolds();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [inviteToken, dishes]);
+
   const visibleDishes = dishes.map((dish) => {
-    const selected = ownHolds.find((item) => (item.dishId ?? item.id) === dish.id);
+    const selected = activeOwnHolds.find((item) => (item.dishId ?? item.id) === dish.id);
 
     if (selected) {
       return {
@@ -108,7 +167,7 @@ export function PublicOrderingPage({ inviteToken, dishes }: PublicOrderingPagePr
   }
 
   async function removeHold(holdId: string) {
-    const hold = ownHolds.find((item) => item.id === holdId);
+    const hold = activeOwnHolds.find((item) => item.id === holdId);
 
     if (!hold) {
       return;
@@ -137,7 +196,7 @@ export function PublicOrderingPage({ inviteToken, dishes }: PublicOrderingPagePr
 
   async function handleDishAction(dish: PublicDish) {
     if (dish.state === "selected") {
-      const hold = ownHolds.find((item) => (item.dishId ?? item.id) === dish.id);
+      const hold = activeOwnHolds.find((item) => (item.dishId ?? item.id) === dish.id);
 
       if (hold) {
         await removeHold(hold.id);
@@ -158,7 +217,7 @@ export function PublicOrderingPage({ inviteToken, dishes }: PublicOrderingPagePr
         clientSessionId: getClientSessionId(),
         customerName: input.customerName,
         notes: input.notes,
-        dishIds: ownHolds.map((item) => item.dishId ?? item.id),
+        dishIds: activeOwnHolds.map((item) => item.dishId ?? item.id),
       }),
     });
 
@@ -198,7 +257,7 @@ export function PublicOrderingPage({ inviteToken, dishes }: PublicOrderingPagePr
       </section>
 
       <SelectionDrawer
-        ownHolds={ownHolds}
+        ownHolds={activeOwnHolds}
         claimed={claimed}
         onSubmit={() => setDialogOpen(true)}
         onRemoveHold={removeHold}
