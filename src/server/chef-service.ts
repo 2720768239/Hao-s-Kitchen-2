@@ -16,6 +16,10 @@ export function createChefService(
   const publish = options.eventBus;
 
   return {
+    getActiveMeal(): MealSessionRecord | null {
+      return findActiveMeal(database);
+    },
+
     setBusinessStatus(status: BusinessStatus): MealSessionRecord | null {
       if (status === "gathering") {
         const active = findActiveMeal(database);

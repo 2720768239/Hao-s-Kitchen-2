@@ -352,3 +352,222 @@ button:disabled {
   font-size: 24px;
   font-weight: 900;
 }
+
+.chef-console {
+  padding-bottom: 88px;
+}
+
+.chef-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.chef-header div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chef-header strong {
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: -0.08em;
+  border-bottom: 3px solid var(--stamp-red);
+}
+
+.chef-header span,
+.chef-pill,
+.chef-link-button,
+.link-primary {
+  border-radius: 6px;
+  padding: 5px 8px;
+  background: var(--stamp-red);
+  color: #fff7e8;
+  text-decoration: none;
+  font-weight: 900;
+}
+
+.chef-title {
+  margin: 0 0 14px;
+  font-size: 28px;
+}
+
+.chef-card {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255, 249, 236, 0.82);
+  padding: 14px;
+  margin-bottom: 12px;
+}
+
+.business-card .eyebrow {
+  margin: 0 0 8px;
+  color: var(--muted-ink);
+  font-weight: 900;
+}
+
+.status-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.status-button,
+.chef-primary {
+  border: 0;
+  border-radius: 10px;
+  padding: 14px 12px;
+  background: var(--stamp-red);
+  color: #fff7e8;
+  font-weight: 900;
+}
+
+.status-button.dark {
+  background: #181512;
+}
+
+.status-button:disabled {
+  opacity: 0.62;
+}
+
+.current-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 12px 0;
+}
+
+.current-status strong,
+.state-on {
+  color: var(--stamp-red);
+}
+
+.state-off,
+.muted-dark {
+  color: var(--muted-ink);
+}
+
+.invite-field,
+.editor-form label,
+.login-card label {
+  display: grid;
+  gap: 6px;
+  font-weight: 900;
+}
+
+.invite-field input,
+.editor-form input,
+.editor-form textarea,
+.login-card input {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 11px;
+  background: rgba(255, 255, 255, 0.44);
+}
+
+.chef-list {
+  display: grid;
+  gap: 10px;
+}
+
+.row-card {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.row-card h2,
+.row-card p {
+  margin: 0;
+}
+
+.row-card h2 {
+  font-size: 20px;
+}
+
+.row-card p {
+  margin-top: 4px;
+  color: var(--muted-ink);
+  font-size: 13px;
+}
+
+.editor-form {
+  display: grid;
+  gap: 14px;
+}
+
+.editor-form textarea {
+  min-height: 92px;
+}
+
+.switch-line {
+  grid-template-columns: 1fr auto;
+  align-items: center;
+}
+
+.history-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.history-detail article {
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+  margin-top: 10px;
+}
+
+.chef-tabbar {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: min(430px, 100vw);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: rgba(23, 19, 15, 0.16);
+  border-top: 1px solid var(--line);
+}
+
+.chef-tabbar a {
+  display: grid;
+  place-items: center;
+  min-height: 58px;
+  background: #f5eddc;
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.toolbar-line {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+}
+
+.link-primary {
+  display: inline-block;
+}
+
+.login-card {
+  margin-top: 22vh;
+}
+
+.login-card form {
+  display: grid;
+  gap: 14px;
+}
+
+.error-text {
+  margin: 0;
+  color: var(--stamp-red);
+  font-weight: 900;
+}
