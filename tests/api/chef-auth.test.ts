@@ -41,4 +41,13 @@ describe("chef auth", () => {
     expect(response.status).toBe(401);
     expect(response.headers.get("set-cookie")).toBeNull();
   });
+
+  it("defaults to 123456 when no chef password hash is configured", async () => {
+    delete process.env.CHEF_PASSWORD_HASH;
+
+    const response = await login(loginRequest("123456"));
+
+    expect(response.status).toBe(204);
+    expect(response.headers.get("set-cookie")).toMatch(/chef_session=/);
+  });
 });
