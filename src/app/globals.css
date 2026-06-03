@@ -580,3 +580,9 @@ button:disabled {
   color: var(--stamp-red);
   font-weight: 900;
 }
+
+.form-message {
+  margin: 0;
+  color: var(--stamp-red);
+  font-weight: 900;
+}

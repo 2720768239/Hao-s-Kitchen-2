@@ -2,6 +2,10 @@ import Link from "next/link";
 import type { DishRecord } from "@/server/chef-service";
 
 export function DishList({ dishes }: { dishes: DishRecord[] }) {
+  if (dishes.length === 0) {
+    return <p className="chef-card">还没有菜品，先新增一道。</p>;
+  }
+
   return (
     <section className="chef-list">
       {dishes.map((dish) => (

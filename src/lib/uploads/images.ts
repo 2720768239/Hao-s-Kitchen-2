@@ -32,7 +32,7 @@ export async function saveUploadedImage(file: File): Promise<{ path: string }> {
   return { path: `/uploads/${filename}` };
 }
 
-function getUploadDir(): string {
+export function getUploadDir(): string {
   if (process.env.UPLOAD_DIR) {
     return process.env.UPLOAD_DIR;
   }

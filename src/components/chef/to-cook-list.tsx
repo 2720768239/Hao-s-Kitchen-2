@@ -8,7 +8,10 @@ export function ToCookList({ items }: { items: ToCookItem[] }) {
   return (
     <section className="chef-list">
       {items.map((item) => (
-        <article key={`${item.dishId}-${item.customerName}-${item.createdAt.toISOString()}`} className="chef-card row-card">
+        <article
+          key={`${item.dishId}-${item.customerName}-${item.createdAt.toISOString()}`}
+          className="chef-card row-card"
+        >
           <div>
             <h2>{item.dishName}</h2>
             <p>

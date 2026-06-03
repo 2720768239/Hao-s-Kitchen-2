@@ -12,7 +12,7 @@ export function ClosedView() {
         <h1 id="closed-title" className="brush-title">
           群雄归隐
         </h1>
-        <p className="red-banner">酒足饭饱，江湖不见</p>
+        <p className="red-banner">酒足饭饱，江湖不见！</p>
         <p className="closed-copy">今日的战局，已是圆满。明日再战，干饭不散！</p>
         <Image
           className="poster-chef"
