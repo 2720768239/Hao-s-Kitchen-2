@@ -5,7 +5,7 @@ import { useState } from "react";
 type SubmitDialogProps = {
   open: boolean;
   onClose: () => void;
-  onSubmit: (input: { customerName: string; notes: string }) => void;
+  onSubmit: (input: { customerName: string; notes: string }) => void | Promise<void>;
 };
 
 export function SubmitDialog({ open, onClose, onSubmit }: SubmitDialogProps) {
@@ -22,10 +22,10 @@ export function SubmitDialog({ open, onClose, onSubmit }: SubmitDialogProps) {
     <div className="dialog-backdrop" role="presentation">
       <form
         className="submit-dialog"
-        onSubmit={(event) => {
+        onSubmit={async (event) => {
           event.preventDefault();
           localStorage.setItem("hao-kitchen.customer-name", customerName);
-          onSubmit({ customerName, notes });
+          await onSubmit({ customerName, notes });
         }}
       >
         <button type="button" className="dialog-close" aria-label="关闭" onClick={onClose}>

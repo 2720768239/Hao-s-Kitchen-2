@@ -157,6 +157,15 @@ button:disabled {
   margin: 14px 0 22px;
 }
 
+.public-error {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(169, 37, 25, 0.12);
+  color: var(--stamp-red);
+  font-weight: 900;
+}
+
 .dish-card {
   display: grid;
   grid-template-columns: 92px 1fr auto;

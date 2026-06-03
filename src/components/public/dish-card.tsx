@@ -27,6 +27,7 @@ export function DishCard({ dish, onHold }: DishCardProps) {
         type="button"
         className="stamp-button"
         disabled={disabled}
+        aria-label={dish.state === "available" ? `馋这道 ${dish.name}` : undefined}
         onClick={() => onHold(dish.id)}
       >
         {actionText}

@@ -18,17 +18,78 @@ export function PublicOrderingPage({ inviteToken, dishes }: PublicOrderingPagePr
   const router = useRouter();
   const [ownHolds, setOwnHolds] = useState<DrawerDish[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const selectedIds = useMemo(() => new Set(ownHolds.map((item) => item.id)), [ownHolds]);
+  const [error, setError] = useState("");
+  const selectedDishIds = useMemo(
+    () => new Set(ownHolds.map((item) => item.dishId ?? item.id)),
+    [ownHolds],
+  );
 
   const refresh = useCallback(() => router.refresh(), [router]);
   useSseRefresh(`/api/events/${inviteToken}`, refresh);
 
   const visibleDishes = dishes.map((dish) =>
-    selectedIds.has(dish.id) ? { ...dish, state: "held" as const } : dish,
+    selectedDishIds.has(dish.id) ? { ...dish, state: "held" as const } : dish,
   );
   const claimed = visibleDishes
     .filter((dish) => dish.state === "claimed")
     .map((dish) => ({ id: dish.id, dishName: dish.name, customerName: dish.claimedBy }));
+
+  async function holdDish(dishId: string) {
+    const selected = visibleDishes.find((item) => item.id === dishId);
+
+    if (!selected || selectedDishIds.has(selected.id)) {
+      return;
+    }
+
+    setError("");
+    const response = await fetch("/api/public/holds", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        inviteToken,
+        dishId,
+        clientSessionId: getClientSessionId(),
+      }),
+    });
+
+    if (!response.ok) {
+      const body = (await response.json().catch(() => null)) as { error?: string } | null;
+      setError(body?.error ?? "这道菜有人先盯上了");
+      router.refresh();
+      return;
+    }
+
+    const hold = (await response.json()) as { id: string; dishId: string };
+    setOwnHolds((items) => [
+      ...items,
+      { id: hold.id, dishId: hold.dishId, dishName: selected.name },
+    ]);
+  }
+
+  async function submitOrder(input: { customerName: string; notes: string }) {
+    setError("");
+    const response = await fetch("/api/public/orders", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        inviteToken,
+        clientSessionId: getClientSessionId(),
+        customerName: input.customerName,
+        notes: input.notes,
+        dishIds: ownHolds.map((item) => item.dishId ?? item.id),
+      }),
+    });
+
+    if (!response.ok) {
+      const body = (await response.json().catch(() => null)) as { error?: string } | null;
+      setError(body?.error ?? "这次选择不可提交");
+      return;
+    }
+
+    setOwnHolds([]);
+    setDialogOpen(false);
+    router.refresh();
+  }
 
   return (
     <main className="mobile-canvas public-ordering">
@@ -46,30 +107,29 @@ export function PublicOrderingPage({ inviteToken, dishes }: PublicOrderingPagePr
         </div>
       </section>
 
+      {error ? <p className="public-error">{error}</p> : null}
+
       <section className="dish-list" aria-label="今晚菜单">
         {visibleDishes.map((dish) => (
-          <DishCard
-            key={dish.id}
-            dish={dish}
-            onHold={(dishId) => {
-              const selected = visibleDishes.find((item) => item.id === dishId);
-              if (selected && !selectedIds.has(selected.id)) {
-                setOwnHolds((items) => [...items, { id: selected.id, dishName: selected.name }]);
-              }
-            }}
-          />
+          <DishCard key={dish.id} dish={dish} onHold={holdDish} />
         ))}
       </section>
 
       <SelectionDrawer ownHolds={ownHolds} claimed={claimed} onSubmit={() => setDialogOpen(true)} />
-      <SubmitDialog
-        open={dialogOpen}
-        onClose={() => setDialogOpen(false)}
-        onSubmit={() => {
-          setDialogOpen(false);
-          router.refresh();
-        }}
-      />
+      <SubmitDialog open={dialogOpen} onClose={() => setDialogOpen(false)} onSubmit={submitOrder} />
     </main>
   );
+}
+
+function getClientSessionId(): string {
+  const key = "hao-kitchen.client-session-id";
+  const existing = localStorage.getItem(key);
+
+  if (existing) {
+    return existing;
+  }
+
+  const next = crypto.randomUUID();
+  localStorage.setItem(key, next);
+  return next;
 }

@@ -12,6 +12,7 @@ export type PublicDish = {
 
 export type DrawerDish = {
   id: string;
+  dishId?: string;
   dishName: string;
   customerName?: string;
 };
