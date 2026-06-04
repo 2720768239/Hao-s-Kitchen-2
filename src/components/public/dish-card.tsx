@@ -31,10 +31,10 @@ export function DishCard({ dish, onAction }: DishCardProps) {
       <div className="dish-body">
         <div className="dish-title-line">
           <h3>{dish.name}</h3>
-          {dish.tags[0] ? <span className="stamp-small">{dish.tags[0]}</span> : null}
+          {/* {dish.tags[0] ? <span className="stamp-small">{dish.tags[0]}</span> : null} */}
         </div>
-        <p>{dish.description}</p>
-        {dish.claimedBy ? <strong className="claimed-by">已被 {dish.claimedBy} 拿下</strong> : null}
+        {/* <p>{dish.description}</p> */}
+        {dish.claimedBy ? <strong className="claimed-by">已被 {dish.claimedBy} 馋住</strong> : null}
       </div>
       <button
         type="button"

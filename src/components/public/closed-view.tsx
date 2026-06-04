@@ -5,15 +5,15 @@ export function ClosedView() {
     <main className="mobile-canvas closed-view">
       <header className="brand-line">
         <strong>极饿时代</strong>
-        <span>好好吃饭，反抗平庸！</span>
+        <span>全员饿人！</span>
       </header>
 
       <section className="poster closed-poster" aria-labelledby="closed-title">
         <h1 id="closed-title" className="brush-title">
           群雄归隐
         </h1>
-        <p className="red-banner">酒足饭饱，江湖不见！</p>
-        <div className="poster-chef-frame">
+        {/* <p className="red-banner">酒足饭饱，江湖不见！</p> */}
+        {/* <div className="poster-chef-frame">
           <Image
             className="poster-chef"
             src="/assets/chef-closed.png"
@@ -21,7 +21,7 @@ export function ClosedView() {
             fill
             priority
           />
-        </div>
+        </div> */}
       </section>
     </main>
   );

@@ -251,10 +251,10 @@ export function PublicOrderingPage({ inviteToken, dishes }: PublicOrderingPagePr
     <main className="mobile-canvas public-ordering">
       <header className="brand-line">
         <strong>极饿时代</strong>
-        <span>好好吃饭，反抗平庸！</span>
+        <span>全员饿人！</span>
       </header>
 
-      <section className="hero-panel" aria-labelledby="gathering-title">
+      {/* <section className="hero-panel" aria-labelledby="gathering-title">
         <Image src="/assets/chef-hero-v2.png" alt="" width={112} height={112} priority />
         <div>
           <div className="hero-meta">
@@ -265,7 +265,7 @@ export function PublicOrderingPage({ inviteToken, dishes }: PublicOrderingPagePr
           <p>厨房才是主场。先看菜单，馋好了就去底部报上名来。</p>
           <span className="hero-scroll">向下看菜，底部报上名来</span>
         </div>
-      </section>
+      </section> */}
 
       {error ? <p className="public-error">{error}</p> : null}
       {feedback ? <p className="public-feedback">{feedback}</p> : null}
