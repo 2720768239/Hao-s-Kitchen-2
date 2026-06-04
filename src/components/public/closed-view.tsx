@@ -1,5 +1,3 @@
-import Image from "next/image";
-
 export function ClosedView() {
   return (
     <main className="mobile-canvas closed-view">

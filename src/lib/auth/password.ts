@@ -1,7 +1,7 @@
 import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 
 const KEY_LENGTH = 64;
-const LOCAL_CHEF_PASSWORD = "123456";
+const LOCAL_CHEF_PASSWORD = "hhhhz";
 const LOCAL_CHEF_PASSWORD_SALT = "hao-kitchen-local-password";
 
 export function createChefPasswordHash(password: string, salt = randomBytes(16).toString("hex")) {

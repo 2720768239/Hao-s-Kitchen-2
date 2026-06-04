@@ -23,7 +23,7 @@ afterEach(() => {
 });
 
 describe("public invite page", () => {
-  it("renders the gathering hero for an active invite", async () => {
+  it("renders the active invite menu", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue({
@@ -48,8 +48,11 @@ describe("public invite page", () => {
       />,
     );
 
-    expect(screen.getByText("英雄集结")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "今晚吃这些" })).toBeInTheDocument();
+    expect(screen.getByText("极饿时代")).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "今晚菜单" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "辣子鸡丁" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /选择 辣子鸡丁/ })).toBeInTheDocument();
+    expect(screen.getByRole("complementary", { name: "嘴馋清单" })).toBeInTheDocument();
   });
 
   it("shows 懂你意思 after a successful submit", async () => {

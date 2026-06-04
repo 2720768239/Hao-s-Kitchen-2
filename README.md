@@ -32,12 +32,12 @@ npm run dev
 复制 `.env.example` 为 `.env`：
 
 ```dotenv
-CHEF_PASSWORD_HASH=scrypt:hao-kitchen-local-password:863476d123933bdbc9248a0dfd7dbb73ed3ab7128c389ca896a5d46660ef6deaa8cd7930d4858ba65a7e27dc9fe1924f0bd021551390b2a40b9ba784d4cd7d90
+CHEF_PASSWORD_HASH=scrypt:hao-kitchen-local-password:3fe7122b06485432effb40c127f9598b8619d4490fc80facc01c0ef5f5960bbe53c4086cfa14f89ec8ccb3d5326d4ad24364c7c02f3c8fdec05132a542a177cd
 DATABASE_PATH=/app/data/hao-kitchen.sqlite
 UPLOAD_DIR=/app/data/uploads
 ```
 
-Default local chef password: `123456`.
+Default local chef password: `hhhhz`.
 
 生成主厨口令 hash：
 
@@ -79,6 +79,10 @@ docker compose exec app npm run db:seed
 - 仅支持 PNG / JPG / WEBP
 - 文件大小不超过 5MB
 - 上传后通过 `/uploads/[filename]` 访问
+
+## 用户使用手册
+
+参考 [极饿时代用户使用手册](docs/05-使用阶段/极饿时代-用户使用手册-2026-06-04.md)。
 
 ## Nginx HTTPS
 
