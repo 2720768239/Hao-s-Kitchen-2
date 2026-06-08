@@ -77,232 +77,41 @@ button:disabled {
 
 .closed-view {
   min-height: 100svh;
+  max-width: none;
+  width: 100%;
+  margin: 0;
   padding: 0;
-  background: #f2ead8;
+  background: none;
 }
 
 .closed-poster {
-  min-height: 100svh;
+  width: 100%;
+  height: 100svh;
   position: relative;
+  padding: 0;
+}
+
+.closed-poster-frame {
+  position: relative;
+  width: 100vw;
+  height: 100svh;
   overflow: hidden;
-  background:
-    linear-gradient(rgba(23, 19, 15, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(23, 19, 15, 0.025) 1px, transparent 1px),
-    radial-gradient(circle at 30% 12%, rgba(255, 255, 255, 0.42), transparent 28%),
-    #f2ead8;
-  background-size:
-    100% 12px,
-    14px 100%,
-    auto,
-    auto;
 }
 
-.closed-nav {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 24px 24px 0;
+.closed-poster-image {
+  object-fit: fill;
 }
 
-.closed-brand-mark {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.closed-brand-mark strong {
-  padding-bottom: 2px;
-  border-bottom: 3px solid var(--stamp-red);
-  font-size: 22px;
-  font-weight: 1000;
-}
-
-.closed-brand-mark span {
-  color: var(--ink);
-  font-size: 12px;
-  font-weight: 900;
-}
-
-.closed-menu-icon {
-  display: grid;
-  gap: 5px;
-  width: 19px;
-}
-
-.closed-menu-icon span {
-  display: block;
-  height: 2px;
-  background: var(--ink);
-}
-
-.closed-message {
-  position: relative;
-  z-index: 2;
-  display: grid;
-  justify-items: center;
-  padding: 22px 22px 0;
-  text-align: center;
-}
-
-.closed-brush-title {
-  margin: 0;
-  color: #120f0c;
-  font-size: 82px;
-  font-weight: 1000;
-  line-height: 0.95;
-  text-shadow:
-    1px 0 0 #120f0c,
-    0 2px 0 rgba(18, 15, 12, 0.16);
-}
-
-.closed-red-banner {
-  display: inline-block;
-  margin: 16px 0 0;
-  padding: 8px 13px 9px;
-  background:
-    linear-gradient(90deg, rgba(255, 247, 232, 0.1), transparent 18%, transparent 82%, rgba(255, 247, 232, 0.1)),
-    var(--stamp-red);
-  color: #fff7e8;
-  font-size: 25px;
-  font-weight: 1000;
-  line-height: 1.1;
-  box-shadow: 0 3px 0 rgba(23, 19, 15, 0.18);
-}
-
-.closed-subcopy {
-  margin: 12px 0 0;
-  color: #2a231c;
-  font-size: 16px;
-  font-weight: 900;
-  line-height: 1.65;
-}
-
-.closed-hero-art {
+.sr-only {
   position: absolute;
-  inset: auto 0 0;
-  z-index: 1;
-  height: 68%;
-}
-
-.closed-chef-image {
-  object-fit: cover;
-  object-position: center 48%;
-}
-
-.closed-back-character {
-  position: absolute;
-  left: 50%;
-  top: 42%;
-  z-index: 2;
-  color: #f2ead8;
-  font-size: 60px;
-  font-weight: 1000;
-  line-height: 1;
-  text-shadow:
-    2px 2px 0 rgba(0, 0, 0, 0.76),
-    -1px 1px 0 rgba(0, 0, 0, 0.5);
-  transform: translate(-50%, -50%) rotate(-4deg);
-  mix-blend-mode: screen;
-  opacity: 0.94;
-}
-
-.closed-art-fade {
-  position: absolute;
-  inset: 0;
-}
-
-.closed-sticker {
-  position: absolute;
-  z-index: 3;
-  color: #18130f;
-  font-weight: 1000;
-  box-shadow: 2px 4px 0 rgba(0, 0, 0, 0.2);
-}
-
-.closed-sticker-left {
-  left: 30px;
-  bottom: 146px;
-  padding: 7px 11px;
-  border: 1px solid rgba(23, 19, 15, 0.45);
-  background: #f7eddb;
-  font-size: 18px;
-  transform: rotate(-7deg);
-}
-
-.closed-sticker-round {
-  right: 28px;
-  bottom: 114px;
-  display: grid;
-  place-items: center;
-  width: 94px;
-  height: 94px;
-  border: 5px double rgba(169, 37, 25, 0.82);
-  border-radius: 999px;
-  background: rgba(255, 247, 232, 0.92);
-  color: var(--stamp-red);
-  font-size: 20px;
-  line-height: 1.15;
-  text-align: center;
-  transform: rotate(-8deg);
-}
-
-.closed-footer {
-  position: absolute;
-  right: 22px;
-  bottom: 26px;
-  left: 22px;
-  z-index: 3;
-  display: grid;
-  gap: 9px;
-  color: rgba(255, 247, 232, 0.78);
-  text-align: center;
-}
-
-.closed-footer p,
-.closed-footer strong {
-  margin: 0;
-}
-
-.closed-footer p {
-  font-size: 13px;
-  font-weight: 800;
-}
-
-.closed-footer strong {
-  color: #fff7e8;
-  font-size: 15px;
-  font-weight: 1000;
-}
-
-@media (max-width: 380px) {
-  .closed-nav {
-    padding: 20px 20px 0;
-  }
-
-
-
-  .closed-brush-title {
-    font-size: 70px;
-  }
-
-  .closed-red-banner {
-    font-size: 22px;
-  }
-
-  .closed-sticker-left {
-    left: 22px;
-    bottom: 138px;
-    font-size: 16px;
-  }
-
-  .closed-sticker-round {
-    right: 20px;
-    width: 84px;
-    height: 84px;
-    font-size: 18px;
-  }
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .paper-tags {

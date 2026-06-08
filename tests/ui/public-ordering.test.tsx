@@ -10,17 +10,20 @@ afterEach(() => {
 });
 
 describe("public ordering ui", () => {
-  it("renders 群雄归隐 for a closed public state", () => {
+  it("renders the poster-based closed state", () => {
     render(<ClosedView />);
 
-    expect(screen.getByRole("heading", { name: "群雄归隐" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "饿疯了" })).toBeInTheDocument();
+    expect(
+      screen.getByAltText("电影海报风格的暂停营业页，主题为饿疯了"),
+    ).toBeInTheDocument();
   });
 
   it("groups the drawer as 你已经馋上的 and 已有馋主", () => {
     render(
       <SelectionDrawer
-        ownHolds={[{ id: "hold-1", dishName: "辣子鸡丁" }]}
-        claimed={[{ id: "claim-1", dishName: "鱼香肉丝", customerName: "小红" }]}
+        ownHolds={[{ id: "hold-1", dishName: "杈ｅ瓙楦′竵" }]}
+        claimed={[{ id: "claim-1", dishName: "楸奸鑲変笣", customerName: "灏忕孩" }]}
         onSubmit={vi.fn()}
         onRemoveHold={vi.fn()}
       />,
@@ -35,7 +38,7 @@ describe("public ordering ui", () => {
   it("allows the expanded drawer to be closed explicitly", () => {
     render(
       <SelectionDrawer
-        ownHolds={[{ id: "hold-1", dishName: "辣子鸡丁" }]}
+        ownHolds={[{ id: "hold-1", dishName: "杈ｅ瓙楦′竵" }]}
         claimed={[]}
         onSubmit={vi.fn()}
         onRemoveHold={vi.fn()}
@@ -53,7 +56,7 @@ describe("public ordering ui", () => {
 
     render(
       <SelectionDrawer
-        ownHolds={[{ id: "hold-1", dishName: "辣子鸡丁", actionText: "这道给你留着" }]}
+        ownHolds={[{ id: "hold-1", dishName: "杈ｅ瓙楦′竵", actionText: "杩欓亾缁欎綘鐣欑潃" }]}
         claimed={[]}
         onSubmit={vi.fn()}
         onRemoveHold={onRemoveHold}
@@ -73,18 +76,18 @@ describe("public ordering ui", () => {
       <DishCard
         dish={{
           id: "dish-laziji",
-          name: "辣子鸡丁",
+          name: "杈ｅ瓙楦′竵",
           imagePath: "/assets/dish-laziji.png",
-          description: "香辣过瘾，米饭杀手",
-          tags: ["推荐"],
+          description: "棣欒荆杩囩樉锛岀背楗潃鎵?",
+          tags: ["鎺ㄨ崘"],
           state: "selected",
-          actionText: "这道给你留着",
+          actionText: "杩欓亾缁欎綘鐣欑潃",
         }}
         onAction={onAction}
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "取消已选 辣子鸡丁" }));
+    fireEvent.click(screen.getByRole("button", { name: "取消已选 杈ｅ瓙楦′竵" }));
 
     expect(onAction).toHaveBeenCalledTimes(1);
   });
@@ -94,10 +97,10 @@ describe("public ordering ui", () => {
       <DishCard
         dish={{
           id: "dish-laziji",
-          name: "辣子鸡丁",
+          name: "杈ｅ瓙楦′竵",
           imagePath: "/assets/dish-laziji.png",
-          description: "香辣过瘾，米饭杀手",
-          tags: ["推荐"],
+          description: "棣欒荆杩囩樉锛岀背楗潃鎵?",
+          tags: ["鎺ㄨ崘"],
           state: "held",
         }}
         onAction={vi.fn()}
