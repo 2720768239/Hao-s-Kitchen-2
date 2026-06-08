@@ -249,7 +249,7 @@ export function PublicOrderingPage({ inviteToken, dishes }: PublicOrderingPagePr
   return (
     <main className="mobile-canvas public-ordering">
       <header className="brand-line">
-        <strong>极饿时代</strong>
+        <strong>极饿世代</strong>
         <span>全员饿人！</span>
       </header>
 

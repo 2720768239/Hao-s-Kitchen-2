@@ -48,7 +48,7 @@ describe("public invite page", () => {
       />,
     );
 
-    expect(screen.getByText("极饿时代")).toBeInTheDocument();
+    expect(screen.getByText("极饿世代")).toBeInTheDocument();
     expect(screen.getByRole("region", { name: "今晚菜单" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "辣子鸡丁" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /选择 辣子鸡丁/ })).toBeInTheDocument();

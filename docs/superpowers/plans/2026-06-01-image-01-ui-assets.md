@@ -15,7 +15,7 @@
 Create or modify these files:
 
 ```text
-docs/极饿时代-UI设计说明文档-2026-05-31.md
+docs/极饿世代-UI设计说明文档-2026-05-31.md
 docs/ui-assets/image-01/README.md
 docs/ui-assets/image-01/generated/paper-texture.png
 docs/ui-assets/image-01/generated/black-paper-texture.png
@@ -46,7 +46,7 @@ Responsibilities:
 - `docs/ui-assets/image-01/icons/`: code-native SVG icons.
 - `docs/ui-assets/image-01/reference-crops/`: reference-only crop output.
 - `docs/ui-assets/image-01/README.md`: asset index and integration notes.
-- `docs/极饿时代-UI设计说明文档-2026-05-31.md`: implementation rules derived from the visual sample.
+- `docs/极饿世代-UI设计说明文档-2026-05-31.md`: implementation rules derived from the visual sample.
 
 ### Task 1: Add Deterministic Reference Asset Builder
 
@@ -205,7 +205,7 @@ Expected: six PNG files print with non-zero dimensions. Transparent assets repor
 ### Task 4: Append Implementable UI Rules
 
 **Files:**
-- Modify: `docs/极饿时代-UI设计说明文档-2026-05-31.md`
+- Modify: `docs/极饿世代-UI设计说明文档-2026-05-31.md`
 
 - [ ] **Step 1: Append the image-01 high-fidelity section**
 
@@ -225,7 +225,7 @@ Add a new section containing:
 Run:
 
 ```powershell
-rg -n "375px|字体|字号|行高|色值|阴影|圆角|间距|320-359px|360-389px|390-429px|430px\\+" .\docs\极饿时代-UI设计说明文档-2026-05-31.md
+rg -n "375px|字体|字号|行高|色值|阴影|圆角|间距|320-359px|360-389px|390-429px|430px\\+" .\docs\极饿世代-UI设计说明文档-2026-05-31.md
 ```
 
 Expected: every required topic is present in the appended section.
@@ -306,6 +306,6 @@ Expected: only the intended UI document, script, and `docs/ui-assets/image-01/` 
 Run:
 
 ```powershell
-git add -- scripts/build-image-01-reference-assets.ps1 docs/ui-assets/image-01 docs/极饿时代-UI设计说明文档-2026-05-31.md
+git add -- scripts/build-image-01-reference-assets.ps1 docs/ui-assets/image-01 docs/极饿世代-UI设计说明文档-2026-05-31.md
 git commit -m "docs: add image-01 high fidelity ui asset sample"
 ```

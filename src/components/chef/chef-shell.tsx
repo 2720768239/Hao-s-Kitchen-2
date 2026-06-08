@@ -20,7 +20,7 @@ export function ChefShell({ title, children }: ChefShellProps) {
     <main className="mobile-canvas chef-console">
       <header className="chef-header">
         <div>
-          <strong>极饿时代</strong>
+          <strong>极饿世代</strong>
           <span>主厨工具台</span>
         </div>
       </header>

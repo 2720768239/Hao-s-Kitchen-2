@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "极饿时代",
+  title: "极饿世代",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {

@@ -4,9 +4,9 @@ export function ClosedView() {
   return (
     <main className="mobile-canvas closed-view">
       <section className="closed-poster" aria-labelledby="closed-title">
-        <header className="closed-nav" aria-label="极饿时代停业状态">
+        <header className="closed-nav" aria-label="">
           <div className="closed-brand-mark">
-            <strong>极饿时代</strong>
+            <strong>极饿世代</strong>
             <span>全员饿人！</span>
           </div>
           <span className="closed-menu-icon" aria-hidden="true">
