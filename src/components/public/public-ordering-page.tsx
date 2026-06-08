@@ -35,7 +35,10 @@ type PublicOrderingPageProps = {
   dishes: PublicDish[];
 };
 
-export function PublicOrderingPage({ inviteToken, dishes }: PublicOrderingPageProps) {
+export function PublicOrderingPage({
+  inviteToken,
+  dishes,
+}: PublicOrderingPageProps) {
   const router = useRouter();
   const [ownHolds, setOwnHolds] = useState<DrawerDish[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -86,7 +89,10 @@ export function PublicOrderingPage({ inviteToken, dishes }: PublicOrderingPagePr
         return;
       }
 
-      const holds = (await response.json()) as Array<{ id: string; dishId: string }>;
+      const holds = (await response.json()) as Array<{
+        id: string;
+        dishId: string;
+      }>;
 
       setOwnHolds((current) => {
         const merged = new Map<string, DrawerDish>();
@@ -122,7 +128,9 @@ export function PublicOrderingPage({ inviteToken, dishes }: PublicOrderingPagePr
   }, [inviteToken, dishes]);
 
   const visibleDishes = dishes.map((dish) => {
-    const selected = activeOwnHolds.find((item) => (item.dishId ?? item.id) === dish.id);
+    const selected = activeOwnHolds.find(
+      (item) => (item.dishId ?? item.id) === dish.id,
+    );
 
     if (selected) {
       return {
@@ -134,13 +142,20 @@ export function PublicOrderingPage({ inviteToken, dishes }: PublicOrderingPagePr
 
     return {
       ...dish,
-      actionText: dish.state === "available" ? pickStableText(AVAILABLE_ACTION_TEXTS, dish.id) : undefined,
+      actionText:
+        dish.state === "available"
+          ? pickStableText(AVAILABLE_ACTION_TEXTS, dish.id)
+          : undefined,
     };
   });
 
   const claimed = visibleDishes
     .filter((dish) => dish.state === "claimed")
-    .map((dish) => ({ id: dish.id, dishName: dish.name, customerName: dish.claimedBy }));
+    .map((dish) => ({
+      id: dish.id,
+      dishName: dish.name,
+      customerName: dish.claimedBy,
+    }));
 
   async function holdDish(dishId: string) {
     const selected = visibleDishes.find((item) => item.id === dishId);
@@ -161,7 +176,9 @@ export function PublicOrderingPage({ inviteToken, dishes }: PublicOrderingPagePr
     });
 
     if (!response.ok) {
-      const body = (await response.json().catch(() => null)) as { error?: string } | null;
+      const body = (await response.json().catch(() => null)) as {
+        error?: string;
+      } | null;
       setError(body?.error ?? "这道菜有人先盯上了");
       router.refresh();
       return;
@@ -197,7 +214,9 @@ export function PublicOrderingPage({ inviteToken, dishes }: PublicOrderingPagePr
     });
 
     if (!response.ok) {
-      const body = (await response.json().catch(() => null)) as { error?: string } | null;
+      const body = (await response.json().catch(() => null)) as {
+        error?: string;
+      } | null;
       setError(body?.error ?? "这道菜暂时不能取消");
       router.refresh();
       return;
@@ -209,7 +228,9 @@ export function PublicOrderingPage({ inviteToken, dishes }: PublicOrderingPagePr
 
   async function handleDishAction(dish: PublicDish) {
     if (dish.state === "selected") {
-      const hold = activeOwnHolds.find((item) => (item.dishId ?? item.id) === dish.id);
+      const hold = activeOwnHolds.find(
+        (item) => (item.dishId ?? item.id) === dish.id,
+      );
 
       if (hold) {
         await removeHold(hold.id);
@@ -235,7 +256,9 @@ export function PublicOrderingPage({ inviteToken, dishes }: PublicOrderingPagePr
     });
 
     if (!response.ok) {
-      const body = (await response.json().catch(() => null)) as { error?: string } | null;
+      const body = (await response.json().catch(() => null)) as {
+        error?: string;
+      } | null;
       setError(body?.error ?? "这次选择不可提交");
       return;
     }
@@ -253,19 +276,6 @@ export function PublicOrderingPage({ inviteToken, dishes }: PublicOrderingPagePr
         <span>全员饿人！</span>
       </header>
 
-      {/* <section className="hero-panel" aria-labelledby="gathering-title">
-        <Image src="/assets/chef-hero-v2.png" alt="" width={112} height={112} priority />
-        <div>
-          <div className="hero-meta">
-            <p className="paper-stamp">英雄集结</p>
-            <span className="hero-status">营业中</span>
-          </div>
-          <h1 id="gathering-title">今晚吃这些</h1>
-          <p>厨房才是主场。先看菜单，馋好了就去底部报上名来。</p>
-          <span className="hero-scroll">向下看菜，底部报上名来</span>
-        </div>
-      </section> */}
-
       {error ? <p className="public-error">{error}</p> : null}
       {feedback ? <p className="public-feedback">{feedback}</p> : null}
 
@@ -281,7 +291,11 @@ export function PublicOrderingPage({ inviteToken, dishes }: PublicOrderingPagePr
         onSubmit={() => setDialogOpen(true)}
         onRemoveHold={removeHold}
       />
-      <SubmitDialog open={dialogOpen} onClose={() => setDialogOpen(false)} onSubmit={submitOrder} />
+      <SubmitDialog
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        onSubmit={submitOrder}
+      />
     </main>
   );
 }
